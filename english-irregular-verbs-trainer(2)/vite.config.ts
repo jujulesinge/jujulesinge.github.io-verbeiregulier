@@ -1,3 +1,9 @@
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  base: '/jujulesinge.github.io-verbeiregulier/', // A AJOUTER ICI
+  // ... le reste de ton code
+})
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
