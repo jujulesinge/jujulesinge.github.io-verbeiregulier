@@ -23,12 +23,19 @@ type Mode = 'home' | 'select-training' | 'training' | 'exam' | 'result';
 
 export default function App() {
   const [mode, setMode] = useState<Mode>('home');
+  const [activeListType, setActiveListType] = useState<'old' | 'new' | 'all'>('all');
   const [examResult, setExamResult] = useState<{
     score: number;
     total: number;
     errors: { verb: Verb; answers: string[] }[];
   } | null>(null);
   const [trainingList, setTrainingList] = useState<Verb[]>(IRREGULAR_VERBS);
+
+  const getActiveVerbs = () => {
+    if (activeListType === 'old') return IRREGULAR_VERBS.filter(v => v.id <= 100);
+    if (activeListType === 'new') return IRREGULAR_VERBS.filter(v => v.id > 100);
+    return IRREGULAR_VERBS;
+  };
 
   const goToHome = () => setMode('home');
   const startExam = () => setMode('exam');
@@ -74,13 +81,34 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               className="flex-1 flex flex-col items-center justify-center gap-12 w-full h-full"
             >
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-4 mb-4">
                 <h2 className="text-4xl md:text-5xl font-extrabold text-white">
                   Prêt à maîtriser l'anglais ?
                 </h2>
                 <p className="text-slate-400 text-lg max-w-md mx-auto">
-                  Apprenez 40 verbes irréguliers essentiels avec feedback immédiat ou testez-vous en conditions réelles.
+                  Apprenez les verbes irréguliers avec feedback immédiat ou testez-vous en conditions réelles.
                 </p>
+              </div>
+
+              <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 mb-2 w-full max-w-md">
+                <button 
+                  onClick={() => setActiveListType('old')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-colors ${activeListType === 'old' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  Anciens
+                </button>
+                <button 
+                  onClick={() => setActiveListType('new')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-colors ${activeListType === 'new' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  Nouveaux
+                </button>
+                <button 
+                  onClick={() => setActiveListType('all')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-colors ${activeListType === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  Tous
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
@@ -141,19 +169,20 @@ export default function App() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                 <button
-                  onClick={() => startTrainingSequence(IRREGULAR_VERBS)}
+                  onClick={() => startTrainingSequence(getActiveVerbs())}
                   className="p-6 bg-indigo-600/20 border border-indigo-500/50 rounded-2xl hover:bg-indigo-600/40 transition-colors text-center md:col-span-2"
                 >
-                  <h3 className="text-xl font-bold text-white mb-2">Tous les verbes</h3>
-                  <p className="text-indigo-200/80 text-sm">Les {IRREGULAR_VERBS.length} verbes à la file</p>
+                  <h3 className="text-xl font-bold text-white mb-2">Tous de la liste</h3>
+                  <p className="text-indigo-200/80 text-sm">Les {getActiveVerbs().length} verbes à la file</p>
                 </button>
-                {Array.from({ length: Math.ceil(IRREGULAR_VERBS.length / 10) }).map((_, i) => {
+                {Array.from({ length: Math.ceil(getActiveVerbs().length / 10) }).map((_, i) => {
+                  const activeVerbs = getActiveVerbs();
                   const start = i * 10;
-                  const end = Math.min((i + 1) * 10, IRREGULAR_VERBS.length);
+                  const end = Math.min((i + 1) * 10, activeVerbs.length);
                   return (
                     <button
                       key={i}
-                      onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(start, end))}
+                      onClick={() => startTrainingSequence(activeVerbs.slice(start, end))}
                       className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
                     >
                       <h3 className="text-xl font-bold text-white mb-2">Série {i + 1}</h3>
@@ -171,6 +200,7 @@ export default function App() {
 
           {mode === 'exam' && (
             <ExamMode 
+              verbs={getActiveVerbs()}
               onFinish={(results) => {
                 setExamResult(results);
                 setMode('result');
@@ -369,10 +399,10 @@ function InputField({ label, value, onChange, status, correctValue }: {
   );
 }
 
-function ExamMode({ onFinish }: { onFinish: (results: any) => void }) {
+function ExamMode({ verbs, onFinish }: { verbs: Verb[], onFinish: (results: any) => void }) {
   const examVerbs = useMemo(() => {
-    return [...IRREGULAR_VERBS].sort(() => Math.random() - 0.5).slice(0, 20);
-  }, []);
+    return [...verbs].sort(() => Math.random() - 0.5).slice(0, 20);
+  }, [verbs]);
 
   const [answers, setAnswers] = useState<Record<number, string[]>>(
     Object.fromEntries(examVerbs.map(v => [v.id, ['', '', '']]))
