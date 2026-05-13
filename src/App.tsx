@@ -142,39 +142,25 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                 <button
                   onClick={() => startTrainingSequence(IRREGULAR_VERBS)}
-                  className="p-6 bg-indigo-600/20 border border-indigo-500/50 rounded-2xl hover:bg-indigo-600/40 transition-colors text-center"
+                  className="p-6 bg-indigo-600/20 border border-indigo-500/50 rounded-2xl hover:bg-indigo-600/40 transition-colors text-center md:col-span-2"
                 >
                   <h3 className="text-xl font-bold text-white mb-2">Tous les verbes</h3>
-                  <p className="text-indigo-200/80 text-sm">Les 40 verbes à la file</p>
+                  <p className="text-indigo-200/80 text-sm">Les {IRREGULAR_VERBS.length} verbes à la file</p>
                 </button>
-                <button
-                  onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(0, 10))}
-                  className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
-                >
-                  <h3 className="text-xl font-bold text-white mb-2">Série 1</h3>
-                  <p className="text-slate-400 text-sm">Verbes 1 à 10</p>
-                </button>
-                <button
-                  onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(10, 20))}
-                  className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
-                >
-                  <h3 className="text-xl font-bold text-white mb-2">Série 2</h3>
-                  <p className="text-slate-400 text-sm">Verbes 11 à 20</p>
-                </button>
-                <button
-                  onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(20, 30))}
-                  className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
-                >
-                  <h3 className="text-xl font-bold text-white mb-2">Série 3</h3>
-                  <p className="text-slate-400 text-sm">Verbes 21 à 30</p>
-                </button>
-                <button
-                  onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(30, 40))}
-                  className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
-                >
-                  <h3 className="text-xl font-bold text-white mb-2">Série 4</h3>
-                  <p className="text-slate-400 text-sm">Verbes 31 à 40</p>
-                </button>
+                {Array.from({ length: Math.ceil(IRREGULAR_VERBS.length / 10) }).map((_, i) => {
+                  const start = i * 10;
+                  const end = Math.min((i + 1) * 10, IRREGULAR_VERBS.length);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => startTrainingSequence(IRREGULAR_VERBS.slice(start, end))}
+                      className="p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-800/50 transition-all text-center"
+                    >
+                      <h3 className="text-xl font-bold text-white mb-2">Série {i + 1}</h3>
+                      <p className="text-slate-400 text-sm">Verbes {start + 1} à {end}</p>
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           )}
